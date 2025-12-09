@@ -1,0 +1,9 @@
+package(
+    "tone",
+    (
+        "__init__.py",
+        "music.py",
+    ),
+    base_path="..",
+    opt=3,
+)
