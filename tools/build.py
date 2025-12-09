@@ -20,14 +20,13 @@ parser.add_argument(
 parser.add_argument(
     "-t", "--timezone", default=8, help="firmware timezone (default: 8)"
 )
-parser.add_argument("-v", "--version", default=False, help="firmware version")
 parser.add_argument(
     "-w", "--address", default=0, help="firmware write address (default: 0)"
 )
 parser.add_argument("-C", "--clean", action="store_true", help="clean built")
-parser.add_argument("-E", "--erase", action="store_true", help="erase flash")
-parser.add_argument("-p", "--port", help="device port")
-parser.add_argument("-P", action="store_true", help="use default device port")
+parser.add_argument("-E", "--erase", action="store_true", help="erase esp32 flash")
+parser.add_argument("-p", "--port", help="esp32 device port")
+parser.add_argument("-P", action="store_true", help="use default esp32 device port")
 args = parser.parse_args()
 
 # show help
@@ -93,6 +92,8 @@ def get_idf_comps(file):
 def walk_dir(dir_path):
     file_list = []
     for root, dirs, files in os.walk(dir_path):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        files[:] = [f for f in files if not f.startswith(".")]
         for dir in dirs:
             file_list.extend(walk_dir(os.path.join(root, dir)))
         for file in files:
@@ -137,8 +138,6 @@ def build(port, board):
             f.write(f"timezone = {args.timezone}\n")
 
         major, minor, revision = board_info["version"].split(".")
-        if type(args.version) is str:
-            major, minor, revision = args.version.split(".")
         with open(ver_file, "w") as f:
             f.write(f"major = {major}\n")
             f.write(f"minor = {minor}\n")
