@@ -1,7 +1,6 @@
 #!python3
 # -*- coding: UTF-8 -*-
 import argparse
-import importlib.util
 import os
 import re
 import shutil
@@ -89,13 +88,13 @@ def get_idf_comps(file):
 
 # build
 #
-def walk_dir(dir_path):
+def walk_dir(dir_path, excludes_subdir=False):
     file_list = []
     for root, dirs, files in os.walk(dir_path):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         files[:] = [f for f in files if not f.startswith(".")]
-        for dir in dirs:
-            file_list.extend(walk_dir(os.path.join(root, dir)))
+        if excludes_subdir and dir_path != root:
+            break
         for file in files:
             file_list.append(os.path.join(root, file))
     return file_list
@@ -121,12 +120,11 @@ def build(port, board):
 
     print("\nbuilding...\n")
 
-    dirs_and_files = [
-        f"ports/{port}/{board}",
-    ]
+    port_dir = f"ports/{port}"
+    board_dir = f"{port_dir}/{board}"
 
-    board_info = load_yaml(f"ports/{port}/{board}/boardinfo.yml")
-    board_module_path = f"ports/{port}/{board}/modules/{board.lower()}"
+    board_info = load_yaml(f"{board_dir}/boardinfo.yml")
+    board_module_path = f"{board_dir}/modules/{board.lower()}"
 
     lang_file = ver_file = None
     if is_exists(board_module_path):
@@ -143,15 +141,19 @@ def build(port, board):
             f.write(f"minor = {minor}\n")
             f.write(f"revision = {revision}\n")
 
-    # coping files
-    copyfiles = []
-    for dir_or_file in dirs_and_files:
-        if os.path.isdir(dir_or_file):
-            copyfiles.extend(walk_dir(dir_or_file))
-        else:
-            copyfiles.append(dir_or_file)
+    # coping port files
+    port_files = []
+    port_files.extend(walk_dir(port_dir, True))
 
-    for file in copyfiles:
+    for file in port_files:
+        destfile = f"micropython/{file}"
+        shutil.copy(file, destfile)
+
+    # coping board files
+    board_files = []
+    board_files.extend(walk_dir(board_dir))
+
+    for file in board_files:
         destfile = f"micropython/{file.replace(f'/{port}/{board}/', f'/{port}/boards/{board}/')}"
         dir = os.path.dirname(destfile)
         if not is_exists(dir):
@@ -159,7 +161,7 @@ def build(port, board):
         shutil.copy(file, destfile)
 
     # esp32 install idf components
-    cmodules_file = f"ports/{port}/{board}/cmodules.cmake"
+    cmodules_file = f"{board_dir}/cmodules.cmake"
     if port == "esp32" and is_exists(cmodules_file):
         idf_components = get_idf_comps(cmodules_file)
         install_idf_comps(idf_components)
@@ -193,7 +195,7 @@ def build(port, board):
         os.remove(ver_file)
 
     # combine resources to firmware
-    resources_dir = f"ports/{port}/{board}/resources"
+    resources_dir = f"{board_dir}/resources"
     firmware_path = f"micropython/ports/{port}/build-{board}/firmware.bin"
 
     # out firmware path
@@ -202,7 +204,7 @@ def build(port, board):
     if not is_exists("dist"):
         os.makedirs("dist")
 
-    partitions = read_partitions_from(copyfiles)
+    partitions = read_partitions_from(board_files)
     if partitions and is_exists(resources_dir) and port == "esp32":
         print("\ncombining resources...\n")
 
