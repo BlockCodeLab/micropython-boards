@@ -2,6 +2,8 @@
 
 Fork: [https://github.com/lemariva/micropython-camera-driver](https://github.com/lemariva/micropython-camera-driver)
 
+基于 [ESP32 Camera Driver](https://github.com/espressif/esp32-camera) 的 MicroPython 版本摄像头驱动，适用于 ESP32、ESP32S2、ESP32S3 芯片，支持多款摄像头。
+
 ## 使用说明
 
 ### 基础函数
