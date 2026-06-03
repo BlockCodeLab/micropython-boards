@@ -134,7 +134,7 @@
  * It should be at least `LV_DRAW_LAYER_SIMPLE_BUF_SIZE` sized but if transformed layers are also used
  * it should be enough to store the largest widget too (width x height x 4 area).
  * Set it to 0 to have no limit. */
-/* #define LV_DRAW_LAYER_MAX_MEMORY 0 */  
+/* #define LV_DRAW_LAYER_MAX_MEMORY 0 */
 /**< No limit by default [bytes]*/
 
 /** Stack size of drawing thread.
@@ -347,7 +347,7 @@
     #define LV_USE_LOG 0
 #endif
 
-#if LV_USE_LOG 
+#if LV_USE_LOG
     /** Set value to one of the following levels of logging detail:
      *  - LV_LOG_LEVEL_TRACE    Log detailed information.
      *  - LV_LOG_LEVEL_INFO     Log important events.
@@ -561,7 +561,7 @@ extern void mp_lv_deinit_gc();
 
 /** Export integer constant to binding. This macro is used with constants in the form of LV_<CONST> that
  *  should also appear on LVGL binding API such as MicroPython. */
-/* #define LV_EXPORT_CONST_INT(int_value) struct _silence_gcc_warning */  
+/* #define LV_EXPORT_CONST_INT(int_value) struct _silence_gcc_warning */
 /**< The default value just prevents GCC warning */
 
 #define LV_EXPORT_CONST_INT(int_value)  enum {ENUM_##int_value = int_value}
@@ -612,12 +612,12 @@ extern void mp_lv_deinit_gc();
 /* Demonstrate special features */
 #define LV_FONT_MONTSERRAT_28_COMPRESSED    0  /**< bpp = 3 */
 #define LV_FONT_DEJAVU_16_PERSIAN_HEBREW    0  /**< Hebrew, Arabic, Persian letters and all their forms */
-/* #define LV_FONT_SIMSUN_14_CJK               0 */  
+/* #define LV_FONT_SIMSUN_14_CJK               0 */
 /**< 1000 most common CJK radicals */
 #define LV_FONT_SIMSUN_16_CJK               0  /**< 1000 most common CJK radicals */
-/* #define LV_FONT_SOURCE_HAN_SANS_SC_14_CJK   0 */  
+/* #define LV_FONT_SOURCE_HAN_SANS_SC_14_CJK   0 */
 /**< 1338 most common CJK radicals */
-/* #define LV_FONT_SOURCE_HAN_SANS_SC_16_CJK   0 */  
+/* #define LV_FONT_SOURCE_HAN_SANS_SC_16_CJK   0 */
 /**< 1338 most common CJK radicals */
 
 /** Pixel perfect monospaced fonts */
@@ -1198,7 +1198,7 @@ extern void mp_lv_deinit_gc();
     #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
     #define LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT   /**< LV_DISPLAY_RENDER_MODE_DIRECT is recommended for best performance */
     #define LV_SDL_BUF_COUNT        1    /**< 1 or 2 */
-    #define LV_SDL_ACCELERATED      1    
+    #define LV_SDL_ACCELERATED      1
 /**< 1: Use hardware acceleration*/
     #define LV_SDL_FULLSCREEN       0    /**< 1: Make the window full screen by default */
     #define LV_SDL_DIRECT_EXIT      1    /**< 1: Exit the application when all SDL windows are closed */

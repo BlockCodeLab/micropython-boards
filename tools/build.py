@@ -14,10 +14,10 @@ from gen_l10n import gen_l10n
 #
 parser = argparse.ArgumentParser(description="MicroPython Board builder.")
 parser.add_argument("board", help="board name")
-parser.add_argument("-C", "--clean", action="store_true", help="clean built")
+parser.add_argument("-c", "--clean", action="store_true", help="clean built")
 parser.add_argument("-p", "--port", help="device port")
 parser.add_argument("-P", action="store_true", help="use default device port")
-parser.add_argument("-E", "--erase", action="store_true", help="erase device flash")
+parser.add_argument("-e", "--erase", action="store_true", help="erase device flash")
 args = parser.parse_args()
 
 # show help
@@ -167,9 +167,9 @@ def build(board_info):
 #ifndef MICROPY_BANNER_MACHINE
 #define MICROPY_BANNER_MACHINE                                                                                         \\
     "Provided by\\r\\n"                                                                                                  \\
-    "░█▀▄░█░░░█▀█░█▀▀░█░█░█▀▀░█▀█░█▀▄░█▀▀░░░█░░░█▀█░█▀▄░\\r\\n"                                                          \\
-    "░█▀▄░█░░░█░█░█░░░█▀▄░█░░░█░█░█░█░█▀▀░░░█░░░█▀█░█▀▄░\\r\\n"                                                          \\
-    "░▀▀░░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀▀░▀▀░░▀▀▀░░░▀▀▀░▀░▀░▀▀░░"
+    "░█▀█░█▀█░█▀█░█▀▀░▀█▀░█▀▀░█░░░█▀▀░░░▀█▀░█▀▀░█▀█░█▄█░\\r\\n"                                                          \\
+    "░█▀▀░█░█░█▀▀░▀▀█░░█░░█░░░█░░░█▀▀░░░░█░░█▀▀░█▀█░█░█░\\r\\n"                                                          \\
+    "░▀░░░▀▀▀░▀░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░░░▀░░▀▀▀░▀░▀░▀░▀░"
 #endif
 """)
 
@@ -225,16 +225,13 @@ def esp32_flash(board_info, firmware_path):
 
     if not firmware_path:
         firmware_dir = "dist"
-        firmware_list = os.listdir(firmware_dir)
-        firmware_list.sort(
-            key=lambda f: (
-                os.path.getmtime(f"{firmware_dir}/{f}")
-                if not os.path.isdir(f"{firmware_dir}/{f}")
-                else 0
-            )
-        )
-        firmware_path = f"{firmware_dir}/{firmware_list[-1]}"
-        print(f"{firmware_list[-1]} is ready.")
+        firmware_path = f"{firmware_dir}/{args.board}.{board_info['version']}.bin"
+
+    if not is_exists(firmware_path):
+        print(f"{firmware_path} does not exist.\n")
+        exit(1)
+
+    print(f"\n{firmware_path} is ready.")
 
     print("\nuploading firmware...\n")
 
