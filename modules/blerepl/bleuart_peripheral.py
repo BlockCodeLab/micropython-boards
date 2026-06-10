@@ -23,7 +23,7 @@ _ADV_APPEARANCE_GENERIC_COMPUTER = const(128)
 
 
 class BLEUART:
-    def __init__(self, ble, name="mpy-uart", rxbuf=256):
+    def __init__(self, ble, name="ble-uart", rxbuf=256):
         self._ble = ble
         self._ble.active(True)
         self._ble.irq(self._irq)
@@ -86,16 +86,15 @@ class BLEUART:
         return result
 
     def write(self, data):
-        """发送数据（支持分包，每包20字节避免 MTU 限制）"""
         if not self._connections:
             return
-        chunk_size = 20
+        chunk_size = 64
         for i in range(0, len(data), chunk_size):
             chunk = data[i : i + chunk_size]
             for conn_handle in self._connections:
                 try:
                     self._ble.gatts_notify(conn_handle, self._tx_handle, chunk)
-                    time.sleep_ms(2)
+                    time.sleep_ms(10)
                 except Exception:
                     # 连接可能已断开，忽略错误
                     pass

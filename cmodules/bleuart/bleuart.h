@@ -1,15 +1,16 @@
-#ifndef MICROPY_INCLUDED_BLEUART_H
-#define MICROPY_INCLUDED_BLEUART_H
+#pragma once
 
 #include "py/ringbuf.h"
 #include "py/runtime.h"
 
-#define BLEUART_MAX_NAME_LEN 32
+#define BLEUART_MAX_NAME_LEN 27
+#define ADV_MAX_PAYLOAD 31
 
 typedef struct _bleuart_obj_t {
   mp_obj_base_t base;
   mp_obj_t ble_obj;
   mp_obj_t callback;
+  mp_obj_t cached_adv_payload;
   uint16_t tx_handle;
   uint16_t rx_handle;
   uint16_t conn_handle;
@@ -17,10 +18,9 @@ typedef struct _bleuart_obj_t {
   uint8_t* buf_data;
   size_t buf_size;
   bool connected;
+  bool overflow;
   char dev_name[BLEUART_MAX_NAME_LEN];
   size_t dev_name_len;
 } bleuart_obj_t;
 
 extern const mp_obj_type_t bleuart_type;
-
-#endif  // MICROPY_INCLUDED_BLEUART_H

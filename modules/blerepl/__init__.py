@@ -3,19 +3,29 @@ import os
 
 import bluetooth
 
+from micropython import const
+
 try:
     from bleuart import BLEUART
 except ImportError:
     from .bleuart_peripheral import BLEUART
 
-__all__ = ("start", "stop", "BLEUART")
+    print("bleuart(cmodule) not found, using blerepl buildin instead")
+
+__all__ = ("start", "stop", "bleuart_handler")
 
 _MP_STREAM_POLL = const(3)
 _MP_STREAM_POLL_RD = const(0x0001)
 
 # 全局变量，用于跟踪当前活动的 BLE REPL 实例
-_current_uart = None
+_current_bleuart = None
 _current_stream = None
+
+
+def bleuart_handler(event, data):
+    if _current_bleuart:
+        return _current_bleuart.handle_irq(event, data)
+    return None
 
 
 class BLEUARTStream(io.IOBase):
@@ -27,6 +37,10 @@ class BLEUARTStream(io.IOBase):
         # 对于某些平台（ESP32）需要主动通知 dupterm 有新数据
         if hasattr(os, "dupterm_notify"):
             os.dupterm_notify(None)
+
+    def read(self, sz=None):
+        data = self._uart.read(sz)
+        return data
 
     def readinto(self, buf):
         # 非阻塞：有数据就填充，否则返回 None
@@ -52,23 +66,23 @@ class BLEUARTStream(io.IOBase):
 def start(name=None):
     """
     启动 BLE REPL 服务。
-    name: 广播时显示的设备名（默认为 "repl"）
+    name: 广播时显示的设备名（默认为 "ble-repl"）
     返回 BLEUART 实例。
     """
-    global _current_uart, _current_stream
+    global _current_bleuart, _current_stream
 
-    # 如果已有活动的 BLE REPL，先停止它
-    if _current_uart is not None:
-        stop()
+    # 如果已有活动的 BLE REPL，直接返回
+    if _current_bleuart is not None:
+        return _current_bleuart
 
     ble = bluetooth.BLE()
     if name is None:
-        name = "repl"
-    uart = BLEUART(ble, name=name)
+        name = "ble-repl"
+    uart = BLEUART(ble, name)
     stream = BLEUARTStream(uart)
     os.dupterm(stream)
 
-    _current_uart = uart
+    _current_bleuart = uart
     _current_stream = stream
     return uart
 
@@ -78,9 +92,9 @@ def stop():
     停止当前 BLE REPL 服务。
     移除 dupterm，关闭蓝牙连接，并停止广播。
     """
-    global _current_uart, _current_stream
+    global _current_bleuart, _current_stream
 
-    if _current_uart is None:
+    if _current_bleuart is None:
         return  # 没有活动实例，无需操作
 
     # 移除 dupterm，恢复标准 REPL
@@ -91,9 +105,9 @@ def stop():
 
     # 关闭 BLE UART 服务（会断开连接、停止广播）
     try:
-        _current_uart.close()
+        _current_bleuart.close()
     except Exception:
         pass
 
-    _current_uart = None
+    _current_bleuart = None
     _current_stream = None
