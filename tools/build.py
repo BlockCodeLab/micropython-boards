@@ -162,14 +162,10 @@ def build(board_info):
     with open(f"boards/{board}/mpconfigboard.h", "a") as f:
         f.write(f"""
 #define MICROPY_BANNER_NAME_AND_VERSION                                                                                \\
-    MICROPY_HW_BOARD_NAME " with " MICROPY_HW_MCU_NAME " v{version} base on MicroPython v" MICROPY_VERSION_STRING_BASE
+    MICROPY_HW_BOARD_NAME " v{version} base on MicroPython v" MICROPY_VERSION_STRING_BASE " with " MICROPY_HW_MCU_NAME
 
 #ifndef MICROPY_BANNER_MACHINE
-#define MICROPY_BANNER_MACHINE                                                                                         \\
-    "Provided by\\r\\n"                                                                                                  \\
-    "░█▀█░█▀█░█▀█░█▀▀░▀█▀░█▀▀░█░░░█▀▀░░░▀█▀░█▀▀░█▀█░█▄█░\\r\\n"                                                          \\
-    "░█▀▀░█░█░█▀▀░▀▀█░░█░░█░░░█░░░█▀▀░░░░█░░█▀▀░█▀█░█░█░\\r\\n"                                                          \\
-    "░▀░░░▀▀▀░▀░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀░░░░▀░░▀▀▀░▀░▀░▀░▀░"
+#define MICROPY_BANNER_MACHINE "Provided by \x1b[1mPopsicle Team\x1b[0m"
 #endif
 """)
 

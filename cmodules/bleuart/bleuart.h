@@ -3,8 +3,8 @@
 #include "py/ringbuf.h"
 #include "py/runtime.h"
 
-#define BLEUART_MAX_NAME_LEN 27
-#define ADV_MAX_PAYLOAD 31
+#define BLEUART_MAX_NAME_LEN 27  // 设备名称最大字符数（含结尾\0）
+#define ADV_MAX_PAYLOAD 31       // 广播数据最大长度（BLE 规范）
 
 typedef struct _bleuart_obj_t {
   mp_obj_base_t base;
@@ -18,6 +18,7 @@ typedef struct _bleuart_obj_t {
   uint8_t* buf_data;
   size_t buf_size;
   bool connected;
+  bool closed;
   bool overflow;
   char dev_name[BLEUART_MAX_NAME_LEN];
   size_t dev_name_len;

@@ -12,6 +12,7 @@ except ImportError:
 
     print("bleuart(cmodule) not found, using blerepl buildin instead")
 
+
 __all__ = ("start", "stop", "bleuart_handler")
 
 _MP_STREAM_POLL = const(3)
@@ -33,7 +34,7 @@ class BLEUARTStream(io.IOBase):
         self._uart = uart
         self._uart.irq(self._on_rx)
 
-    def _on_rx(self):
+    def _on_rx(self, _):
         # 对于某些平台（ESP32）需要主动通知 dupterm 有新数据
         if hasattr(os, "dupterm_notify"):
             os.dupterm_notify(None)
@@ -78,7 +79,7 @@ def start(name=None):
     ble = bluetooth.BLE()
     if name is None:
         name = "ble-repl"
-    uart = BLEUART(ble, name)
+    uart = BLEUART(ble, name=name)
     stream = BLEUARTStream(uart)
     os.dupterm(stream)
 
