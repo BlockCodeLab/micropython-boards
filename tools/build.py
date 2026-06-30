@@ -149,20 +149,13 @@ def build(board_info):
 
     os.chdir(f"micropython/ports/{port}")
 
-    # write version
-    board_module_path = f"boards/{board}/modules/{board.lower()}"
-    if is_exists(board_module_path):
-        major, minor, revision = version.split(".")
-        with open(f"{board_module_path}/version.py", "w") as f:
-            f.write(f"major = {major}\n")
-            f.write(f"minor = {minor}\n")
-            f.write(f"revision = {revision}\n")
-
     # write MICROPY_BANNER_NAME_AND_VERSION and MICROPY_BANNER_MACHINE
     with open(f"boards/{board}/mpconfigboard.h", "a") as f:
         f.write(f"""
-#define MICROPY_BANNER_NAME_AND_VERSION                                                                                \\
-    MICROPY_HW_BOARD_NAME " v{version} base on MicroPython v" MICROPY_VERSION_STRING_BASE " with " MICROPY_HW_MCU_NAME
+#undef MICROPY_VERSION_STRING
+#define MICROPY_VERSION_STRING "{version}"
+
+#define MICROPY_BANNER_NAME_AND_VERSION MICROPY_HW_BOARD_NAME " v{version}; MicroPython v" MICROPY_VERSION_STRING_BASE
 
 #ifndef MICROPY_BANNER_MACHINE
 #define MICROPY_BANNER_MACHINE "Provided by \x1b[1mPopsicle Team\x1b[0m"
