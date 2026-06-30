@@ -121,7 +121,7 @@ class QMI8658:
     def get_data(self):
         try:
             _buffer = self._rreg(QMI8658_REG_DATA, 14)
-            tmp = float(self.u2s(_buffer[1] << 8 | _buffer[0])) / 256.0 + 25.0
+            tmp = float(self.u2s(_buffer[1] << 8 | _buffer[0])) / 256.0
             acc_x = float(self.u2s(_buffer[3] << 8 | _buffer[2])) / self.acc_lsb_div
             acc_y = float(self.u2s(_buffer[5] << 8 | _buffer[4])) / self.acc_lsb_div
             acc_z = float(self.u2s(_buffer[7] << 8 | _buffer[6])) / self.acc_lsb_div
