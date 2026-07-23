@@ -12,7 +12,6 @@ except ImportError:
 
     print("bleuart(cmodule) not found, using blerepl buildin instead")
 
-
 __all__ = ("start", "stop", "bleuart_handler")
 
 _MP_STREAM_POLL = const(3)
@@ -24,6 +23,7 @@ _current_stream = None
 
 
 def bleuart_handler(event, data):
+    global _current_bleuart
     if _current_bleuart:
         return _current_bleuart.handle_irq(event, data)
     return None
@@ -112,3 +112,12 @@ def stop():
 
     _current_bleuart = None
     _current_stream = None
+
+
+# 将 bleuart 的 irq handler 添加到 aioble 中
+try:
+    from aioble.core import register_irq_handler
+
+    register_irq_handler(bleuart_handler)
+except:
+    pass
