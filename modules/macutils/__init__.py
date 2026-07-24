@@ -1,6 +1,6 @@
 import random
 
-__all__ = ("shorten", "bytes_format")
+__all__ = ("shorten", "mac_bytes", "mac_str")
 
 _CHAR_TABLE = "0123456789ABCDEF"
 
@@ -53,7 +53,7 @@ def _int_to_base16(num, length):
     return "".join(result)
 
 
-def _mix_with_fibonacci(self, h):
+def _mix_with_fibonacci(h):
     """使用斐波那契数列混合，确保更好的分布"""
     h = (h ^ (h >> 17)) & 0xFFFFFFFFFFFF
     h = (h * 0xED5AD4BB) & 0xFFFFFFFFFFFF
@@ -70,7 +70,7 @@ def shorten(mac_str, max_length=6, seed=None):
     mac_clean = _normalize_mac(mac_str)
     if mac_clean is None:
         raise ValueError("Invalid MAC address format")
-    seed if seed is not None else random.getrandbits(16)
+    seed = seed if seed is not None else random.getrandbits(16)
     mac_int = _mac_to_int(mac_clean)
     hashed = _simple_hash(mac_int, seed)
     hashed = _mix_with_fibonacci(hashed)
@@ -80,3 +80,7 @@ def shorten(mac_str, max_length=6, seed=None):
 
 def mac_bytes(mac_str):
     return bytes.fromhex(mac_str.replace(":", ""))
+
+
+def mac_str(mac_bytes, sep=":"):
+    return sep.join([f"{b:02x}" for b in mac_bytes])
