@@ -166,7 +166,7 @@ static mp_obj_t bleuart_make_new(const mp_obj_type_t* type, size_t n_args, size_
 
   // 提取参数
   mp_obj_t ble_obj = args[ARG_ble].u_obj;
-  const char* name = "mpy-uart";
+  const char* name = "ble-uart";
   size_t name_len = strlen(name);
   if (args[ARG_name].u_obj != mp_const_none) {
     name = mp_obj_str_get_str(args[ARG_name].u_obj);
