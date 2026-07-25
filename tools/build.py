@@ -63,16 +63,23 @@ def install_idf_comps(components):
     os.chdir("../../../")
 
 
-def get_idf_comps(file):
+def get_idf_comps(board, file):
     components = []
-    pattern = re.compile(r"\$\{C_MODULES_DIR\}/([^/]+)/micropython.cmake\)$")
+    pattern = re.compile(
+        r"\$\{((?:C_MODULES_DIR|MICROPY_BOARD_DIR))\}(?:/cmodules)?/([^/]+)/micropython\.cmake\)$"
+    )
     with open(file) as f:
         lines = f.readlines()
         for line in lines:
             match = pattern.search(line)
             if match:
-                mod_name = match.group(1)
-                idf_comps = load_yaml(f"cmodules/{mod_name}/idf_component.yml")
+                mod_name = match.group(2)
+                yml_path = (
+                    f"cmodules/{mod_name}/idf_component.yml"
+                    if match.group(1) == "C_MODULES_DIR"
+                    else f"boards/{board}/cmodules/{mod_name}/idf_component.yml"
+                )
+                idf_comps = load_yaml(yml_path)
                 if idf_comps:
                     for comp_name, comp_ver in idf_comps["dependencies"].items():
                         comp_id = f"{comp_name}{comp_ver}"
@@ -144,7 +151,7 @@ def build(board_info):
     # esp32 install idf components
     cmodules_file = f"{board_dir}/cmodules.cmake"
     if port == "esp32" and is_exists(cmodules_file):
-        idf_components = get_idf_comps(cmodules_file)
+        idf_components = get_idf_comps(board, cmodules_file)
         install_idf_comps(idf_components)
 
     os.chdir(f"micropython/ports/{port}")
