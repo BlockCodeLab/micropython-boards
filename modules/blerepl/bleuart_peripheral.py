@@ -26,7 +26,7 @@ class BLEUART:
     def __init__(self, ble, name="ble-uart", rxbuf=256):
         self._ble = ble
         self._ble.active(True)
-        self._ble.irq(self._irq)
+        self._ble.irq(self.handle_irq)
 
         # 注册服务
         self._services = (
@@ -57,7 +57,7 @@ class BLEUART:
         """设置数据接收回调：handler() 在有新数据时被调用"""
         self._handler = handler
 
-    def _irq(self, event, data):
+    def handle_irq(self, event, data):
         if event == _IRQ_CENTRAL_CONNECT:
             conn_handle, _, _ = data
             self._connections.add(conn_handle)

@@ -12,7 +12,7 @@ except ImportError:
 
     print("bleuart(cmodule) not found, using blerepl buildin instead")
 
-__all__ = ("start", "stop", "bleuart_handler")
+__all__ = ("start", "stop")
 
 _MP_STREAM_POLL = const(3)
 _MP_STREAM_POLL_RD = const(0x0001)
@@ -20,13 +20,6 @@ _MP_STREAM_POLL_RD = const(0x0001)
 # 全局变量，用于跟踪当前活动的 BLE REPL 实例
 _current_bleuart = None
 _current_stream = None
-
-
-def bleuart_handler(event, data):
-    global _current_bleuart
-    if _current_bleuart:
-        return _current_bleuart.handle_irq(event, data)
-    return None
 
 
 class BLEUARTStream(io.IOBase):
@@ -80,6 +73,26 @@ def start(name=None):
     if name is None:
         name = "ble-repl"
     uart = BLEUART(ble, name=name)
+
+    def bleuart_handler(event, data):
+        global _current_bleuart
+        if _current_bleuart:
+            _current_bleuart.handle_irq(event, data)
+        return None
+
+    try:
+        # 将 bleuart 的 irq handler 添加到 aioble 中
+        import asyncio
+
+        from aioble import core, peripheral
+
+        core.register_irq_handler(bleuart_handler, None)
+        peripheral._connect_event = (
+            peripheral._connect_event or asyncio.ThreadSafeFlag()
+        )
+    except:
+        pass
+
     stream = BLEUARTStream(uart)
     os.dupterm(stream)
 
@@ -112,12 +125,3 @@ def stop():
 
     _current_bleuart = None
     _current_stream = None
-
-
-# 将 bleuart 的 irq handler 添加到 aioble 中
-try:
-    from aioble.core import register_irq_handler
-
-    register_irq_handler(bleuart_handler)
-except:
-    pass
