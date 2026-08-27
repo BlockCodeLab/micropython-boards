@@ -124,7 +124,6 @@ def build(board_info):
 
     board = board_info["id"]
     port = board_info["port"]
-    chip = board_info["chip"] if "chip" in board_info else None
     version = board_info["version"]
 
     board_dir = f"boards/{board}"
@@ -194,10 +193,10 @@ def build(board_info):
             if partition[0] == "resource":
                 cmd_str = f"python3 tools/combine/combine.py --dir {resources_dir} "
                 cmd_str += (
-                    f"--offset {partition[3].strip()} --size {partition[4].strip()} "
+                    f"--address {partition[3].strip()} --size {partition[4].strip()} "
                 )
-                if chip == "esp32":
-                    cmd_str += "--esp32 "
+                if "flash address" in board_info:
+                    cmd_str += f"--offset {board_info['flash address']} "
                 cmd_str += f"{firmware_path} {out_firmware}"
                 os.system(cmd_str)
                 break
@@ -219,20 +218,15 @@ def esp32_flash(board_info, firmware_path):
         else:
             os.system(f"esptool.py --chip auto --port {args.port} erase_flash")
 
-    if not firmware_path:
-        firmware_dir = "dist"
-        firmware_path = f"{firmware_dir}/{args.board}.{board_info['version']}.bin"
-
     if not is_exists(firmware_path):
-        print(f"{firmware_path} does not exist.\n")
+        print(f'"{firmware_path}" does not exist.\n')
         exit(1)
 
     print(f"\n{firmware_path} is ready.")
 
     print("\nuploading firmware...\n")
 
-    chip = board_info["chip"] if "chip" in board_info else None
-    flash_address = 0x1000 if chip == "esp32" else 0
+    flash_address = board_info["flash address"] if "flash address" in board_info else 0
     if args.P:
         os.system(f"esptool.py --chip auto write_flash {flash_address} {firmware_path}")
     else:

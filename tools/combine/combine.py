@@ -92,10 +92,10 @@ def combine(args):
         ):
             # 复制固件内容到输出文件并移动指针到资源分区起始处
             output_file.write(input_file.read())
-            output_file.seek(int(args.offset, 16))
+            output_file.seek(int(args.address, 16))
 
-            if args.esp32:
-                output_file.seek(-0x1000, 1)
+            if args.offset:
+                output_file.seek(-int(args.offset, 16), 1)
 
             # 写入资源分区文件
             output_file.write(partition_file.read())
@@ -117,16 +117,20 @@ if __name__ == "__main__":
     )
     parser.add_argument("--dir", required=True, help="resource folder path")
     parser.add_argument(
-        "--offset",
+        "--address",
         default=hex(0x300000),
-        help="Combine resource address offset (default: 0x300000)",
+        help="Combine resource address (default: 0x300000)",
     )
     parser.add_argument(
         "--size",
         default=hex(0x100000),
         help="Combine resource size (default: 0x100000)",
     )
-    parser.add_argument("--esp32", action="store_true", help="ESP32 or ESP32-S2")
+    parser.add_argument(
+        "--offset",
+        default=hex(0x0),
+        help="Firmware flash address (default: 0x0, esp32: 0x1000)",
+    )
     parser.add_argument("firmware", help="firmware path")
     parser.add_argument("out", help="out path")
     args = parser.parse_args()

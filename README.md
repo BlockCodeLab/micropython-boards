@@ -1,4 +1,4 @@
-# micropython-boards
+# firmwares
 
 编译 MicroPython 固件以支持自制开发板。
 

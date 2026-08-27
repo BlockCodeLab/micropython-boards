@@ -12,6 +12,6 @@ list(APPEND SDKCONFIG_DEFAULTS
 
 set(C_MODULES_DIR ${MICROPY_DIR}/../cmodules)
 
-set(USER_C_MODULES ${MICROPY_BOARD_DIR}/cmodules.cmake)
+set(USER_C_MODULES ${C_MODULES_DIR}/cmodules.esp32.cmake)
 
 set(MICROPY_FROZEN_MANIFEST ${MICROPY_DIR}/../modules/manifest.esp32.py)
