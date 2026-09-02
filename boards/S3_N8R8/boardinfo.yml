@@ -1,3 +1,2 @@
 version: 0.1.0
 port: esp32
-# flash address: 0x0

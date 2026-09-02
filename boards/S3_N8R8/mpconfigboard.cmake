@@ -8,6 +8,7 @@ list(APPEND SDKCONFIG_DEFAULTS
   boards/sdkconfig.240mhz
   boards/sdkconfig.flash_qio_80m
   boards/sdkconfig.spiram_oct
+  ${MICROPY_BOARD_DIR}/sdkconfig.board
 )
 
 set(C_MODULES_DIR ${MICROPY_DIR}/../cmodules)
