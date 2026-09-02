@@ -158,21 +158,54 @@ static mp_obj_t camera_deinit() {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(camera_deinit_obj, camera_deinit);
 
-static mp_obj_t camera_capture() {
-  // acquire a frame
+static mp_obj_t camera_capture(size_t n_pos_args, const mp_obj_t* pos_args, mp_map_t* kw_args) {
+  enum { ARG_quality };
+  static const mp_arg_t allowed_args[] = {
+      {MP_QSTR_quality, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1}},
+  };
+  mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+  mp_arg_parse_all(n_pos_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+  int quality_arg = args[ARG_quality].u_int;
+
   camera_fb_t* fb = esp_camera_fb_get();
   if (!fb) {
     ESP_LOGE(TAG, "Camera Capture Failed");
     return mp_const_false;
   }
 
-  mp_obj_t image = mp_obj_new_bytes(fb->buf, fb->len);
+  mp_obj_t image;
 
-  // return the frame buffer back to the driver for reuse
+  if (fb->format == PIXFORMAT_JPEG) {
+    image = mp_obj_new_bytes(fb->buf, fb->len);
+  } else {
+    int quality;
+    sensor_t* s = esp_camera_sensor_get();
+    if (s != NULL && s->status.quality > 0) {
+      quality = 100 - s->status.quality;
+    } else if (quality_arg >= 0) {
+      quality = 100 - quality_arg;
+    } else {
+      quality = 80;
+    }
+
+    uint8_t* jpg_buf = NULL;
+    size_t jpg_len = 0;
+    bool converted = frame2jpg(fb, quality, &jpg_buf, &jpg_len);
+    if (!converted || jpg_buf == NULL) {
+      ESP_LOGE(TAG, "JPEG conversion failed");
+      esp_camera_fb_return(fb);
+      mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("JPEG conversion failed"));
+      return mp_const_false;
+    }
+    image = mp_obj_new_bytes(jpg_buf, jpg_len);
+    free(jpg_buf);
+  }
+
   esp_camera_fb_return(fb);
   return image;
 }
-static MP_DEFINE_CONST_FUN_OBJ_0(camera_capture_obj, camera_capture);
+static MP_DEFINE_CONST_FUN_OBJ_KW(camera_capture_obj, 0, camera_capture);
 
 static mp_obj_t camera_flip(mp_obj_t direction) {
   sensor_t* s = esp_camera_sensor_get();
