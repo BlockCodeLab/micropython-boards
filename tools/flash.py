@@ -58,15 +58,17 @@ def esp32_flash(board_info, firmware_path):
 
     print(f"uploading firmware...\n")
 
-    flash_address = board_info["flash address"] if "flash address" in board_info else 0
+    flash_offset = (
+        hex(board_info["flash offset"]) if "flash offset" in board_info else 0
+    )
     if args.P:
-        print(f"esptool.py --chip auto write_flash -z {flash_address} {firmware_path}")
+        print(f"esptool.py --chip auto write_flash -z {flash_offset} {firmware_path}")
         os.system(
-            f"esptool.py --chip auto write_flash -z {flash_address} {firmware_path}"
+            f"esptool.py --chip auto write_flash -z {flash_offset} {firmware_path}"
         )
     else:
         os.system(
-            f"esptool.py --chip auto --port {args.port} write_flash -z {flash_address} {firmware_path}"
+            f"esptool.py --chip auto --port {args.port} write_flash -z {flash_offset} {firmware_path}"
         )
 
 
